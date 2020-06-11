@@ -9,6 +9,9 @@ PHONY += klibcdirs
 suffix_y = $(subst $\",,$(CONFIG_INITRAMFS_COMPRESSION))
 datafile_y = initramfs_data.cpio$(suffix_y)
 datafile_d_y = .$(datafile_y).d
+# Gzip
+suffix_$(CONFIG_RD_GZIP)   = .zst
+
 AFLAGS_initramfs_data.o += -DINITRAMFS_IMAGE="usr/$(datafile_y)"
 
 # clean rules do not have CONFIG_INITRAMFS_COMPRESSION.  So clean up after all
@@ -45,8 +48,10 @@ endif
 quiet_cmd_initfs = GEN     $@
       cmd_initfs = $(initramfs) -o $@ $(ramfs-args) $(ramfs-input)
 
-targets := $(datafile_y)
-
+targets := initramfs_data.cpio.gz initramfs_data.cpio.bz2 \
+	initramfs_data.cpio.lzma initramfs_data.cpio.xz \
+	initramfs_data.cpio.lzo initramfs_data.cpio.lz4 \
+	initramfs_data.cpio
 # do not try to update files included in initramfs
 $(deps_initramfs): ;
 
