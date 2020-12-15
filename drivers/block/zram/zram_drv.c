@@ -42,8 +42,12 @@ static DEFINE_IDR(zram_index_idr);
 static DEFINE_MUTEX(zram_index_mutex);
 
 static int zram_major;
+<<<<<<< HEAD
 static struct zram *zram_devices;
 static const char *default_compressor = "lzo-rle";
+=======
+static const char *default_compressor = CONFIG_ZRAM_DEF_COMP;
+>>>>>>> 0293ff9ed425 (BACKPORT: zram: break the strict dependency from lzo)
 
 /* Module params (documentation at end) */
 static unsigned int num_devices = 1;
@@ -1076,11 +1080,7 @@ static ssize_t mm_stat_show(struct device *dev,
 	max_used = atomic_long_read(&zram->stats.max_used_pages);
 
 	ret = scnprintf(buf, PAGE_SIZE,
-<<<<<<< HEAD
-			"%8llu %8llu %8llu %8lu %8ld %8llu %8lu %8llu\n",
-=======
 			"%8llu %8llu %8llu %8lu %8ld %8llu %8lu %8llu %8llu %8llu %8llu\n",
->>>>>>> fdb60d6e4d57 (BACKPORT: zram: add stat to gather incompressible pages since zram set up)
 			orig_size << PAGE_SHIFT,
 			(u64)atomic64_read(&zram->stats.compr_data_size),
 			mem_used << PAGE_SHIFT,
