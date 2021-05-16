@@ -27,21 +27,35 @@ inline unsigned long int_sqrt(unsigned long x)
 
 	place = 1UL << (BITS_PER_LONG - 2);
 
+<<<<<<< HEAD
 	do{
 		place >>= 2;
 	}while(place > x);
+=======
+	do {
+		place >>= 2;
+	} while(place > x);
+>>>>>>> ed7c901e0150 (lib: int_sqrt: Improve 3x faster integer sqrt.)
 
 	do {
 		tmp = root + place;
 		root >>= 1;
 
+<<<<<<< HEAD
 		if (x >= tmp)
 		{
+=======
+		if (x >= tmp) {
+>>>>>>> ed7c901e0150 (lib: int_sqrt: Improve 3x faster integer sqrt.)
 			x -= tmp;
 			root += place;
 		}
 		place >>= 2;
+<<<<<<< HEAD
 	}while (place != 0);
+=======
+	} while (place != 0);
+>>>>>>> ed7c901e0150 (lib: int_sqrt: Improve 3x faster integer sqrt.)
 
 	return root;
 }
