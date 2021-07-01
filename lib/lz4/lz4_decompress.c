@@ -357,6 +357,84 @@ int LZ4_decompress_fast(const char *source, char *dest, int originalSize)
 		(BYTE *)(dest - 64 * KB), NULL, 64 * KB);
 }
 
+/* ===== Instantiate a few more decoding cases, used more than once. ===== */
+
+static int LZ4_decompress_safe_withPrefix64k(const char *source, char *dest,
+				      int compressedSize, int maxOutputSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      compressedSize, maxOutputSize,
+				      endOnInputSize, decode_full_block,
+				      withPrefix64k,
+				      (BYTE *)dest - 64 * KB, NULL, 0);
+}
+
+static int LZ4_decompress_safe_withSmallPrefix(const char *source, char *dest,
+					       int compressedSize,
+					       int maxOutputSize,
+					       size_t prefixSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      compressedSize, maxOutputSize,
+				      endOnInputSize, decode_full_block,
+				      noDict,
+				      (BYTE *)dest - prefixSize, NULL, 0);
+}
+
+int LZ4_decompress_safe_forceExtDict(const char *source, char *dest,
+				     int compressedSize, int maxOutputSize,
+				     const void *dictStart, size_t dictSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      compressedSize, maxOutputSize,
+				      endOnInputSize, decode_full_block,
+				      usingExtDict, (BYTE *)dest,
+				      (const BYTE *)dictStart, dictSize);
+}
+
+static int LZ4_decompress_fast_extDict(const char *source, char *dest,
+				       int originalSize,
+				       const void *dictStart, size_t dictSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      0, originalSize,
+				      endOnOutputSize, decode_full_block,
+				      usingExtDict, (BYTE *)dest,
+				      (const BYTE *)dictStart, dictSize);
+}
+
+/*
+ * The "double dictionary" mode, for use with e.g. ring buffers: the first part
+ * of the dictionary is passed as prefix, and the second via dictStart + dictSize.
+ * These routines are used only once, in LZ4_decompress_*_continue().
+ */
+static FORCE_INLINE
+int LZ4_decompress_safe_doubleDict(const char *source, char *dest,
+				   int compressedSize, int maxOutputSize,
+				   size_t prefixSize,
+				   const void *dictStart, size_t dictSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      compressedSize, maxOutputSize,
+				      endOnInputSize, decode_full_block,
+				      usingExtDict, (BYTE *)dest - prefixSize,
+				      (const BYTE *)dictStart, dictSize);
+}
+
+static FORCE_INLINE
+int LZ4_decompress_fast_doubleDict(const char *source, char *dest,
+				   int originalSize, size_t prefixSize,
+				   const void *dictStart, size_t dictSize)
+{
+	return LZ4_decompress_generic(source, dest,
+				      0, originalSize,
+				      endOnOutputSize, decode_full_block,
+				      usingExtDict, (BYTE *)dest - prefixSize,
+				      (const BYTE *)dictStart, dictSize);
+}
+
+/* ===== streaming decompression functions ===== */
+
 int LZ4_setStreamDecode(LZ4_streamDecode_t *LZ4_streamDecode,
 	const char *dictionary, int dictSize)
 {
