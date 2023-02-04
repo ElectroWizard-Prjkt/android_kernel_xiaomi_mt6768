@@ -118,6 +118,7 @@ int ip_forward(struct sk_buff *skb)
 	 */
 	if (ip_hdr(skb)->ttl <= 1)
 		goto too_many_hops;
+#endif
 
 	#endif
 
