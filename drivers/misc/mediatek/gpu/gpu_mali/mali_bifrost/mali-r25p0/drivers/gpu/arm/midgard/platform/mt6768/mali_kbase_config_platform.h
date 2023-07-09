@@ -76,5 +76,9 @@
  * Default value: See @ref kbase_platform_funcs_conf
  */
 #define PLATFORM_FUNCS (NULL)
+/*
+ * Period for DVFS sampling
+ */
+#define DEFAULT_PM_DVFS_PERIOD 50 /* 50ms */
 
 extern struct kbase_pm_callback_conf pm_callbacks;
