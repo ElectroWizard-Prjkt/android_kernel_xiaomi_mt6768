@@ -79,6 +79,5 @@
 /*
  * Period for DVFS sampling
  */
-#define DEFAULT_PM_DVFS_PERIOD 12 /* 50ms */
-
+#define DEFAULT_PM_DVFS_PERIOD 8 /* 8ms */
 extern struct kbase_pm_callback_conf pm_callbacks;
