@@ -30,8 +30,12 @@
 #include <linux/freezer.h>
 #include <linux/irq.h>
 #include <linux/list_sort.h>
+#include <linux/module.h>
 #include "../sched/sched.h"
 #include "internals.h"
+
+uint __read_mostly sbalance_debug = 0;
+module_param(sbalance_debug, uint, 0644);
 
 /* Perform IRQ balancing every POLL_MS milliseconds */
 #define POLL_MS CONFIG_IRQ_SBALANCE_POLL_MSEC
@@ -97,7 +101,8 @@ void sbalance_desc_del(struct irq_desc *desc)
 	spin_unlock(&bal_irq_lock);
 }
 
-static int bal_irq_move_node_cmp(void *priv, struct list_head *lhs_p, struct list_head *rhs_p)
+static int bal_irq_move_node_cmp(void *priv, struct list_head *lhs_p,
+				 struct list_head *rhs_p)
 {
 	const struct bal_irq *lhs = list_entry(lhs_p, typeof(*lhs), move_node);
 	const struct bal_irq *rhs = list_entry(rhs_p, typeof(*rhs), move_node);
@@ -157,8 +162,15 @@ static int move_irq_to_cpu(struct bal_irq *bi, int cpu)
 	if (!ret) {
 		/* Update the old interrupt count using the new CPU */
 		bi->old_nr = *per_cpu_ptr(desc->kstat_irqs, cpu);
-		pr_debug("Moved IRQ%d (CPU%d -> CPU%d)\n",
-			 irq_desc_get_irq(desc), prev_cpu, cpu);
+		if (sbalance_debug) {
+			if (desc->action && desc->action->name)
+				pr_info("Moved IRQ%d (%s) (CPU%d -> CPU%d)\n",
+					irq_desc_get_irq(desc),
+					desc->action->name, prev_cpu, cpu);
+			else
+				pr_info("Moved IRQ%d (CPU%d -> CPU%d)\n",
+					irq_desc_get_irq(desc), prev_cpu, cpu);
+		}
 	}
 	return ret;
 }
@@ -220,11 +232,8 @@ static void balance_irqs(void)
 	 * interrupts. That way, time spent processing each interrupt is
 	 * considered when balancing.
 	 */
-	for_each_cpu(cpu, &cpus) {
-		struct cpufreq_policy *policy = cpufreq_cpu_get(cpu);
-		per_cpu(cpu_cap, cpu) = arch_scale_cpu_capacity(NULL, cpu) *
-					policy->min / policy->max;
-	}
+	for_each_cpu(cpu, &cpus)
+		per_cpu(cpu_cap, cpu) = cpu_rq(cpu)->cpu_capacity;
 
 	list_for_each_entry_rcu(bi, &bal_irq_list, node) {
 		if (!update_irq_data(bi, &cpu))
