@@ -190,7 +190,6 @@ static void vmpressure_work_fn(struct work_struct *work)
 	bool ancestor = false;
 	bool signalled = false;
 
-	spin_lock(&vmpr->sr_lock);
 	/*
 	 * Several contexts might be calling vmpressure(), so it is
 	 * possible that the work was rescheduled again before the old
@@ -277,7 +276,6 @@ void vmpressure(gfp_t gfp, struct mem_cgroup *memcg, bool tree,
 		return;
 
 	if (tree) {
-		spin_lock(&vmpr->sr_lock);
 		scanned = vmpr->tree_scanned += scanned;
 		vmpr->tree_reclaimed += reclaimed;
 		spin_unlock(&vmpr->sr_lock);
@@ -292,7 +290,6 @@ void vmpressure(gfp_t gfp, struct mem_cgroup *memcg, bool tree,
 		if (!memcg || memcg == root_mem_cgroup)
 			return;
 
-		spin_lock(&vmpr->sr_lock);
 		scanned = vmpr->scanned += scanned;
 		reclaimed = vmpr->reclaimed += reclaimed;
 		if (scanned < vmpressure_win) {
