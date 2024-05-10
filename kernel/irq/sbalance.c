@@ -27,6 +27,7 @@
 
 #define pr_fmt(fmt) "sbalance: " fmt
 
+#include <linux/cpufreq.h>
 #include <linux/freezer.h>
 #include <linux/irq.h>
 #include <linux/list_sort.h>
