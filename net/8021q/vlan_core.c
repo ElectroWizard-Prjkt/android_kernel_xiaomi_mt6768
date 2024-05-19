@@ -360,7 +360,6 @@ void vlan_vids_del_by_dev(struct net_device *dev,
 
 	list_for_each_entry(vid_info, &vlan_info->vid_list, list) 
 		vlan_vid_del(dev, vid_info->proto, vid_info->vid);
-	
 }
 EXPORT_SYMBOL(vlan_vids_del_by_dev);
 

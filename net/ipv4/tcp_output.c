@@ -2454,7 +2454,6 @@ bool tcp_schedule_loss_probe(struct sock *sk, bool advancing_rto)
 	if (tp->fastopen_rsk)
 		return false;
 
-	early_retrans = sock_net(sk)->ipv4.sysctl_tcp_early_retrans;
 	/* Schedule a loss probe in 2*RTT for SACK capable connections
 	 * in Open state, that are either limited by cwnd or application.
 	 */
