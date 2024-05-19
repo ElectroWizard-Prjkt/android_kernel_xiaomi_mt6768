@@ -4208,10 +4208,6 @@ static void binder_transaction(struct binder_proc *proc,
 
 	if (reply) {
 		binder_enqueue_thread_work(thread, tcomplete);
-#ifdef BINDER_WATCHDOG
-		binder_update_transaction_time(&binder_transaction_log,
-				in_reply_to, 2);
-#endif
 		binder_inner_proc_lock(target_proc);
 		if (target_thread->is_dead) {
 			binder_inner_proc_unlock(target_proc);
