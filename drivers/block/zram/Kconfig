@@ -14,8 +14,6 @@ config ZRAM
 
 	  See Documentation/blockdev/zram.txt for more information.
 
-<<<<<<< HEAD
-=======
 config ZRAM_DEDUP
 	bool "Deduplication support for ZRAM data"
 	depends on ZRAM
@@ -70,7 +68,6 @@ config ZRAM_DEF_COMP
 	default "lz4hc" if ZRAM_DEF_COMP_LZ4HC
 	default "842" if ZRAM_DEF_COMP_842
 
->>>>>>> 0293ff9ed425 (BACKPORT: zram: break the strict dependency from lzo)
 config ZRAM_WRITEBACK
        bool "Write back incompressible or idle page to backing device"
        depends on ZRAM
