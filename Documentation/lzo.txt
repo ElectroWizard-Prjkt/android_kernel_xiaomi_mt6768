@@ -78,6 +78,16 @@ Description
      is an implementation design choice independent on the algorithm or
      encoding.
 
+Versions
+
+0: Original version
+1: LZO-RLE
+
+Version 1 of LZO implements an extension to encode runs of zeros using run
+length encoding. This improves speed for data with many zeros, which is a
+common case for zram. This modifies the bitstream in a backwards compatible way
+(v1 can correctly decompress v0 compressed data, but v0 cannot read v1 data).
+
 Byte sequences
 ==============
 
