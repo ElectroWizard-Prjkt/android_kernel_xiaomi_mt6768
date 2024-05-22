@@ -99,8 +99,8 @@ Byte sequences
                 invalid at this place.
 
       17      : bitstream version. If the first byte is 17, the next byte
-                gives the bitstream version. If the first byte is not 17,
-                the bitstream version is 0.
+                gives the bitstream version (version 1 only). If the first byte
+                is not 17, the bitstream version is 0.
 
       18..21  : copy 0..3 literals
                 state = (byte - 17) = 0..3  [ copy <state> literals ]
