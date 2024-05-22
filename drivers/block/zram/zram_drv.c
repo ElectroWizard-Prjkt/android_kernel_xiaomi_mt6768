@@ -42,12 +42,8 @@ static DEFINE_IDR(zram_index_idr);
 static DEFINE_MUTEX(zram_index_mutex);
 
 static int zram_major;
-<<<<<<< HEAD
 static struct zram *zram_devices;
-static const char *default_compressor = "lzo-rle";
-=======
-static const char *default_compressor = CONFIG_ZRAM_DEF_COMP;
->>>>>>> 0293ff9ed425 (BACKPORT: zram: break the strict dependency from lzo)
+static const char *default_compressor = "lzo";
 
 /* Module params (documentation at end) */
 static unsigned int num_devices = 1;
