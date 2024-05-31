@@ -37,8 +37,17 @@
 *.su
 *.symtypes
 *.tar
+*.gz
+*.bz2
+*.lzma
 *.xz
-Module.symvers
+*.lz4
+*.lzo
+*.zst
+*.rej
+*.patch
+*.gcno
+*.ll
 modules.builtin
 
 #
