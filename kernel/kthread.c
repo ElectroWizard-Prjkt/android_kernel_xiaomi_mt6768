@@ -764,19 +764,6 @@ kthread_create_worker_on_cpu(int cpu, unsigned int flags,
 }
 EXPORT_SYMBOL(kthread_create_worker_on_cpu);
 
-/*
- * Returns true when the work could not be queued at the moment.
- * It happens when it is already pending in a worker list
- * or when it is being cancelled.
- */
-static inline bool queuing_blocked(struct kthread_worker *worker,
-				   struct kthread_work *work)
-{
-	lockdep_assert_held(&worker->lock);
-
-	return !list_empty(&work->node) || work->canceling;
-}
-
 static void kthread_insert_work_sanity_check(struct kthread_worker *worker,
 					     struct kthread_work *work)
 {
@@ -798,6 +785,35 @@ static void kthread_insert_work(struct kthread_worker *worker,
 	if (!worker->current_work && likely(worker->task))
 		wake_up_process(worker->task);
 }
+
+/**
+ * __kthread_queue_work - queue a kthread_work while under lock
+ * @worker: target kthread_worker
+ * @work: kthread_work to queue
+ * @pos: The position in @worker.work_list to insert @work before
+ *
+ * This is the same as kthread_queue_work(), except that it already expects
+ * the caller to be holding &kthread_worker.lock and allows for specifying a
+ * custom position in @worker.work_list to insert @work before.
+ *
+ * This function is mostly useful for users which might need to create their
+ * own delayed kthread_worker implementations.
+ *
+ * Returns: %true if @work was successfully queued, %false if it was already
+ * pending.
+ */
+bool __kthread_queue_work(struct kthread_worker *worker,
+			  struct kthread_work *work,
+			  struct list_head *pos)
+{
+	if (!queuing_blocked(worker, work)) {
+		kthread_insert_work(worker, work, pos);
+		return true;
+	}
+
+	return false;
+}
+EXPORT_SYMBOL_GPL(__kthread_queue_work);
 
 /**
  * kthread_queue_work - queue a kthread_work

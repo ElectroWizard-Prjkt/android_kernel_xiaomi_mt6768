@@ -23,19 +23,21 @@
  * tunables
  */
 /* max queue in one round of service */
-static const int cfq_quantum = 8;
+static const int cfq_quantum = 32;
 static const u64 cfq_fifo_expire[2] = { NSEC_PER_SEC / 4, NSEC_PER_SEC / 8 };
 /* maximum backwards seek, in KiB */
 static const int cfq_back_max = 16 * 1024;
 /* penalty of a backwards seek */
-static const int cfq_back_penalty = 2;
+static const int cfq_back_penalty = 1;
 static const u64 cfq_slice_sync = NSEC_PER_SEC / 10;
 static u64 cfq_slice_async = NSEC_PER_SEC / 25;
 static const int cfq_slice_async_rq = 2;
-static u64 cfq_slice_idle = NSEC_PER_SEC / 125;
+static u64 cfq_slice_idle = 0;
 static u64 cfq_group_idle = NSEC_PER_SEC / 125;
 static const u64 cfq_target_latency = (u64)NSEC_PER_SEC * 3/10; /* 300 ms */
 static const int cfq_hist_divisor = 4;
+
+extern struct blkcg *blkcg_bg;
 
 /*
  * offset from end of queue service tree for idle class
@@ -659,6 +661,8 @@ static inline void cfqg_put(struct cfq_group *cfqg)
 }
 
 #define cfq_log_cfqq(cfqd, cfqq, fmt, args...)	do {			\
+	if (likely(!blk_trace_note_message_enabled((bfqd)->queue)))	\
+			break;							\
 	blk_add_cgroup_trace_msg((cfqd)->queue,				\
 			cfqg_to_blkg((cfqq)->cfqg)->blkcg,		\
 			"cfq%d%c%c " fmt, (cfqq)->pid,			\
@@ -668,6 +672,8 @@ static inline void cfqg_put(struct cfq_group *cfqg)
 } while (0)
 
 #define cfq_log_cfqg(cfqd, cfqg, fmt, args...)	do {			\
+	if (likely(!blk_trace_note_message_enabled((bfqd)->queue)))	\
+		break;							\
 	blk_add_cgroup_trace_msg((cfqd)->queue,				\
 			cfqg_to_blkg(cfqg)->blkcg, fmt, ##args);	\
 } while (0)
@@ -1644,6 +1650,14 @@ static void cfq_pd_init(struct blkg_policy_data *pd)
 {
 	struct cfq_group *cfqg = pd_to_cfqg(pd);
 	struct cfq_group_data *cgd = blkcg_to_cfqgd(pd->blkg->blkcg);
+
+	if (pd->blkg->blkcg == &blkcg_root) {
+		cgd->weight = 1000;
+		cgd->group_idle = 2000 * NSEC_PER_USEC;
+	} else if (pd->blkg->blkcg == blkcg_bg) {
+		cgd->weight = 200;
+		cgd->group_idle = 0;
+	}
 
 	cfqg->weight = cgd->weight;
 	cfqg->leaf_weight = cgd->leaf_weight;

@@ -15,7 +15,7 @@
 
 #define COPY4(dst, src)	\
 		put_unaligned(get_unaligned((const u32 *)(src)), (u32 *)(dst))
-#if defined(__x86_64__)
+#if defined(CONFIG_X86_64)
 #define COPY8(dst, src)	\
 		put_unaligned(get_unaligned((const u64 *)(src)), (u64 *)(dst))
 #else
@@ -25,19 +25,24 @@
 
 #if defined(__BIG_ENDIAN) && defined(__LITTLE_ENDIAN)
 #error "conflicting endian definitions"
+#elif defined(CONFIG_X86_64)
+#define LZO_USE_CTZ64	1
+#define LZO_USE_CTZ32	1
+#elif defined(CONFIG_X86) || defined(CONFIG_PPC)
+=======
 #elif defined(__x86_64__)
 #define LZO_USE_CTZ64	1
 #define LZO_USE_CTZ32	1
 #elif defined(__i386__) || defined(__powerpc__)
+>>>>>>> parent of 63e1d69204f5 (UPSTREAM: lib/lzo: tidy-up ifdefs)
 #define LZO_USE_CTZ32	1
 #elif defined(__arm__) && (__LINUX_ARM_ARCH__ >= 5)
 #define LZO_USE_CTZ32	1
 #endif
-
 #define M1_MAX_OFFSET	0x0400
 #define M2_MAX_OFFSET	0x0800
 #define M3_MAX_OFFSET	0x4000
-#define M4_MAX_OFFSET	0xbfff
+#define M4_MAX_OFFSET	0xbffe
 
 #define M1_MIN_LEN	2
 #define M1_MAX_LEN	2

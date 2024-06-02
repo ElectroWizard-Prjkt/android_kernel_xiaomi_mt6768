@@ -373,7 +373,6 @@ void dev_pm_enable_wake_irq_complete(struct device *dev)
 		enable_irq(wirq->irq);
 		wirq->status |= WAKE_IRQ_DEDICATED_ENABLED;
 	}
-}
 
 /**
  * dev_pm_arm_wake_irq - Arm device wake-up

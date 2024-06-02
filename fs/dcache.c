@@ -3101,12 +3101,7 @@ static int prepend_name(char **buffer, int *buflen, const struct qstr *name)
 		return -ENAMETOOLONG;
 	p = *buffer -= dlen + 1;
 	*p++ = '/';
-	while (dlen--) {
-		char c = *dname++;
-		if (!c)
-			break;
-		*p++ = c;
-	}
+	memcpy(p, dname, dlen);
 	return 0;
 }
 

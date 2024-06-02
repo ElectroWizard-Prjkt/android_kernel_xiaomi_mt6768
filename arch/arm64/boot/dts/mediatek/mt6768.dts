@@ -3405,7 +3405,6 @@ defined(CONFIG_MTK_CAM_SECURITY_SUPPORT)
 		enable_type_c;
 		power_path_support;
 		enable_dynamic_mivr;
-		disable_pd_dual;
 
 		/* common */
 		battery_cv = <4350000>;

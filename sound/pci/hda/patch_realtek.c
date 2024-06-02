@@ -7922,8 +7922,6 @@ static void alc897_fixup_lenovo_headset_mic(struct hda_codec *codec,
 	if (action == HDA_FIXUP_ACT_PROBE) {
 		snd_hda_set_pin_ctl_cache(codec, 0x1a, PIN_IN | AC_PINCTL_VREF_100);
 	}
-}
-
 static void alc897_fixup_lenovo_headset_mode(struct hda_codec *codec,
 				     const struct hda_fixup *fix, int action)
 {
