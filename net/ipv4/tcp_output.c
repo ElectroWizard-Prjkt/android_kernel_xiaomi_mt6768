@@ -37,6 +37,7 @@
 #define pr_fmt(fmt) "TCP: " fmt
 
 #include <net/tcp.h>
+#include <linux/sysctl.h>
 
 #include <linux/compiler.h>
 #include <linux/gfp.h>
@@ -190,16 +191,19 @@ static inline void tcp_event_ack_sent(struct sock *sk, unsigned int pkts,
 
 u32 tcp_default_init_rwnd(struct net *net, u32 mss)
 {
-	/* Initial receive window should be twice of TCP_INIT_CWND to
-	 * enable proper sending of new unsent data during fast recovery
-	 * (RFC 3517, Section 4, NextSeg() rule (2)). Further place a
-	 * limit when mss is larger than 1460.
-	 */
-	u32 init_rwnd = net->ipv4.sysctl_tcp_default_init_rwnd;
+    u32 init_rwnd;
 
-	if (mss > 1460)
-		init_rwnd = max((1460 * init_rwnd) / mss, 2U);
-	return init_rwnd;
+    /* Get the default initial receive window using sysctl */
+    init_rwnd = READ_ONCE(net->ipv4.sysctl_tcp_rmem[1]); 
+
+    /* Initial receive window should be twice of TCP_INIT_CWND to
+     * enable proper sending of new unsent data during fast recovery
+     * (RFC 3517, Section 4, NextSeg() rule (2)). Further place a
+     * limit when mss is larger than 1460.
+     */
+    if (mss > 1460)
+        init_rwnd = max((1460 * init_rwnd) / mss, 2U);
+    return init_rwnd;
 }
 
 /* Determine a window scaling and initial window to offer.
