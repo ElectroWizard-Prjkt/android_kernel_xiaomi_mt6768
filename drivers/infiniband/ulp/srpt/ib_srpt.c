@@ -85,7 +85,6 @@ static int srpt_set_u64_x(const char *buffer, struct kernel_param *kp)
 	return kstrtou64(buffer, 16, (u64 *)kp->arg);
 }
 static int srpt_get_u64_x(char *buffer, struct kernel_param *kp)
-
 {
 	return sprintf(buffer, "0x%016llx", *(u64 *)kp->arg);
 }
@@ -3194,3 +3193,4 @@ static void __exit srpt_cleanup_module(void)
 
 module_init(srpt_init_module);
 module_exit(srpt_cleanup_module);
+

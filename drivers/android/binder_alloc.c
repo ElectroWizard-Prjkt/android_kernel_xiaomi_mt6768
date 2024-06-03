@@ -310,7 +310,7 @@ err_page_ptr_cleared:
 err_no_vma:
 	if (mm) {
 		up_read(&mm->mmap_sem);
-		mmput(mm);
+		mmput_async(mm);
 	}
 	return vma ? -ENOMEM : -ESRCH;
 }
@@ -1181,3 +1181,4 @@ void binder_alloc_shrinker_exit(void)
 	unregister_shrinker(&binder_shrinker);
 	list_lru_destroy(&binder_alloc_lru);
 }
+

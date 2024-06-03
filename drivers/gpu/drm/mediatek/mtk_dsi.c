@@ -116,21 +116,13 @@
 #define DSI_PS_WC	REG_FLD_MSB_LSB(14, 0)
 #define DSI_PS_SEL	REG_FLD_MSB_LSB(18, 16)
 
-#define DSI_VSA_NL 0x20
-#define DSI_VBP_NL 0x24
-#define DSI_VFP_NL 0x28
-#define DSI_SIZE_CON 0x38
-#define DSI_VACT_NL 0x2C
-#define DSI_LFR_CON 0x30
-#define DSI_LFR_STA 0x34
-#define LFR_STA_FLD_REG_LFR_SKIP_STA REG_FLD_MSB_LSB(8, 8)
-#define LFR_STA_FLD_REG_LFR_SKIP_CNT REG_FLD_MSB_LSB(5, 0)
-#define LFR_CON_FLD_REG_LFR_MODE REG_FLD_MSB_LSB(1, 0)
-#define LFR_CON_FLD_REG_LFR_TYPE REG_FLD_MSB_LSB(3, 2)
-#define LFR_CON_FLD_REG_LFR_EN REG_FLD_MSB_LSB(4, 4)
-#define LFR_CON_FLD_REG_LFR_UPDATE REG_FLD_MSB_LSB(5, 5)
-#define LFR_CON_FLD_REG_LFR_VSE_DIS REG_FLD_MSB_LSB(6, 6)
-#define LFR_CON_FLD_REG_LFR_SKIP_NUM REG_FLD_MSB_LSB(13, 8)
+#define DSI_PSCTRL		0x1c
+#define DSI_PS_WC			0x3fff
+#define DSI_PS_SEL			(3 << 16)
+#define PACKED_PS_16BIT_RGB565		(0 << 16)
+#define PACKED_PS_18BIT_RGB666		(1 << 16)
+#define LOOSELY_PS_24BIT_RGB666		(2 << 16)
+#define PACKED_PS_24BIT_RGB888		(3 << 16)
 
 #define DSI_HSA_WC 0x50
 #define DSI_HBP_WC 0x54
@@ -993,30 +985,19 @@ static void mtk_dsi_ps_control_vact(struct mtk_dsi *dsi)
 		ps_wc = width * dsi_buf_bpp;
 		SET_VAL_MASK(value, mask, ps_wc, DSI_PS_WC);
 
-		switch (dsi->format) {
-		case MIPI_DSI_FMT_RGB888:
-			SET_VAL_MASK(value, mask, 3, DSI_PS_SEL);
-			break;
-		case MIPI_DSI_FMT_RGB666:
-			SET_VAL_MASK(value, mask, 2, DSI_PS_SEL);
-			break;
-		case MIPI_DSI_FMT_RGB666_PACKED:
-			SET_VAL_MASK(value, mask, 1, DSI_PS_SEL);
-			break;
-		case MIPI_DSI_FMT_RGB565:
-			SET_VAL_MASK(value, mask, 0, DSI_PS_SEL);
-			break;
-		}
-		size = (height << 16) + width;
-	} else {
-		ps_wc = (((dsc_params->chunk_size + 2) / 3) * 3);
-		if (dsc_params->slice_mode == 1)
-			ps_wc *= 2;
-
-		SET_VAL_MASK(value, mask, ps_wc, DSI_PS_WC);
-		SET_VAL_MASK(value, mask, 5, DSI_PS_SEL);
-
-		size = (height << 16) + (ps_wc / 3);
+	switch (dsi->format) {
+	case MIPI_DSI_FMT_RGB888:
+		ps_bpp_mode |= PACKED_PS_24BIT_RGB888;
+		break;
+	case MIPI_DSI_FMT_RGB666:
+		ps_bpp_mode |= LOOSELY_PS_24BIT_RGB666;
+		break;
+	case MIPI_DSI_FMT_RGB666_PACKED:
+		ps_bpp_mode |= PACKED_PS_18BIT_RGB666;
+		break;
+	case MIPI_DSI_FMT_RGB565:
+		ps_bpp_mode |= PACKED_PS_16BIT_RGB565;
+		break;
 	}
 
 	writel(height, dsi->regs + DSI_VACT_NL);
@@ -1070,7 +1051,39 @@ static void mtk_dsi_rxtx_control(struct mtk_dsi *dsi)
 	writel(DSI_WMEM_CONTI, dsi->regs + DSI_MEM_CONTI);
 }
 
-static void mtk_dsi_calc_vdo_timing(struct mtk_dsi *dsi)
+static void mtk_dsi_ps_control(struct mtk_dsi *dsi)
+{
+	u32 dsi_tmp_buf_bpp;
+	u32 tmp_reg;
+
+	switch (dsi->format) {
+	case MIPI_DSI_FMT_RGB888:
+		tmp_reg = PACKED_PS_24BIT_RGB888;
+		dsi_tmp_buf_bpp = 3;
+		break;
+	case MIPI_DSI_FMT_RGB666:
+		tmp_reg = LOOSELY_PS_24BIT_RGB666;
+		dsi_tmp_buf_bpp = 3;
+		break;
+	case MIPI_DSI_FMT_RGB666_PACKED:
+		tmp_reg = PACKED_PS_18BIT_RGB666;
+		dsi_tmp_buf_bpp = 3;
+		break;
+	case MIPI_DSI_FMT_RGB565:
+		tmp_reg = PACKED_PS_16BIT_RGB565;
+		dsi_tmp_buf_bpp = 2;
+		break;
+	default:
+		tmp_reg = PACKED_PS_24BIT_RGB888;
+		dsi_tmp_buf_bpp = 3;
+		break;
+	}
+
+	tmp_reg += dsi->vm.hactive * dsi_tmp_buf_bpp & DSI_PS_WC;
+	writel(tmp_reg, dsi->regs + DSI_PSCTRL);
+}
+
+static void mtk_dsi_config_vdo_timing(struct mtk_dsi *dsi)
 {
 	u32 horizontal_sync_active_byte;
 	u32 horizontal_backporch_byte;
