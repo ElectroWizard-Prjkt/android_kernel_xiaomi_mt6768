@@ -618,15 +618,6 @@ static struct ctl_table ipv4_table[] = {
 		.proc_handler   = proc_dointvec
 	},
 	{
-		.procname	= "tcp_early_retrans",
-		.data		= &sysctl_tcp_early_retrans,
-		.maxlen		= sizeof(int),
-		.mode		= 0644,
-		.proc_handler	= proc_dointvec_minmax,
-		.extra1		= &zero,
-		.extra2		= &four,
-	},
-	{
 		.procname	= "tcp_min_tso_segs",
 		.data		= &sysctl_tcp_min_tso_segs,
 		.maxlen		= sizeof(int),
@@ -1124,6 +1115,15 @@ static struct ctl_table ipv4_net_table[] = {
 		.extra1		= &three,
 		.extra2		= &hundred,
 	},
+	{
+		.procname	= "tcp_early_retrans",
+		.data		= &init_net.ipv4.sysctl_tcp_early_retrans,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &four,
+	},
 	{ }
 };
 
@@ -1195,3 +1195,4 @@ static __init int sysctl_ipv4_init(void)
 }
 
 __initcall(sysctl_ipv4_init);
+

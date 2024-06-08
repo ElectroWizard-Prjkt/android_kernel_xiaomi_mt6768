@@ -311,6 +311,10 @@ err_no_vma:
 	if (mm) {
 		up_read(&mm->mmap_sem);
 		mmput(mm);
+=========
+		up_write(&mm->mmap_sem);
+		mmput_async(mm);
+>>>>>>>>> Temporary merge branch 2
 	}
 	return vma ? -ENOMEM : -ESRCH;
 }
@@ -1181,3 +1185,4 @@ void binder_alloc_shrinker_exit(void)
 	unregister_shrinker(&binder_shrinker);
 	list_lru_destroy(&binder_alloc_lru);
 }
+
