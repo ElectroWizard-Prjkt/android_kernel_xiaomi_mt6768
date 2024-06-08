@@ -309,12 +309,8 @@ err_page_ptr_cleared:
 	}
 err_no_vma:
 	if (mm) {
-		up_read(&mm->mmap_sem);
-		mmput(mm);
-=========
 		up_write(&mm->mmap_sem);
 		mmput_async(mm);
->>>>>>>>> Temporary merge branch 2
 	}
 	return vma ? -ENOMEM : -ESRCH;
 }
