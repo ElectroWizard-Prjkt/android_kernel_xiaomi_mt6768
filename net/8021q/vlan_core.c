@@ -366,6 +366,7 @@ void vlan_vids_del_by_dev(struct net_device *dev,
 		if (!vlan_hw_filter_capable(by_dev, vid_info))
 			continue;
 		vlan_vid_del(dev, vid_info->proto, vid_info->vid);
+	}
 }
 
 EXPORT_SYMBOL(vlan_vids_del_by_dev);
