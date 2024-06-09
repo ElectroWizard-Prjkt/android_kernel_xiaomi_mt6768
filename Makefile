@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 VERSION = 4
 PATCHLEVEL = 14
-SUBLEVEL = 344
-EXTRAVERSION = The One Memory
+SUBLEVEL = 345
+EXTRAVERSION = -TheOneMemory
 NAME = Petit Gorille
 
 # *DOCUMENTATION*
