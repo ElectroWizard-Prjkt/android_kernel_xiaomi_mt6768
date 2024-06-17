@@ -44,7 +44,6 @@
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
 #include <linux/mmc/sd.h>
-#include <linux/mmc/block.h>
 
 #ifdef CONFIG_MMC_FFU
 #include <linux/mmc/ffu.h>
@@ -1292,7 +1291,7 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
 {
     int ret = 0;
 
-    #if ((part_type & mask) == rpmb) {
+    if ((part_type & EXT_CSD_PART_CONFIG_ACC_MASK) == EXT_CSD_PART_CONFIG_ACC_RPMB) {
         if (card->ext_csd.cmdq_en) {
             ret = mmc_cmdq_disable(card);
             if (ret)
@@ -1300,7 +1299,6 @@ static int mmc_blk_part_switch_pre(struct mmc_card *card,
         }
         mmc_retune_pause(card->host);
     }
-#endif
 
     return ret;
 }
@@ -1310,12 +1308,11 @@ static int mmc_blk_part_switch_post(struct mmc_card *card,
 {
     int ret = 0;
 
-    #if ((part_type & mask) == rpmb) {
+    if ((part_type & EXT_CSD_PART_CONFIG_ACC_MASK) == EXT_CSD_PART_CONFIG_ACC_RPMB) {
         mmc_retune_unpause(card->host);
         if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
             ret = mmc_cmdq_enable(card);
     }
-#endif
 
     return ret;
 }
