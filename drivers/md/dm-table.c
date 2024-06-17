@@ -6,6 +6,7 @@
  */
 
 #include "dm-core.h"
+#include "dm.h"
 
 #include <linux/module.h>
 #include <linux/vmalloc.h>

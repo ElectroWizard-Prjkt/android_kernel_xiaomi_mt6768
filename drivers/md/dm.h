@@ -33,6 +33,8 @@
  */
 #define DM_STATUS_NOFLUSH_FLAG		(1 << 0)
 
+#define DM_WAIT_DEV_MAX_TIME (1000)
+
 /*
  * List of devices that a metadevice uses and should open/close.
  */
