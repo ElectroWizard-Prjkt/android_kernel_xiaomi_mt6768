@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
 config ZRAM
 	tristate "Compressed RAM block device support"
-depends on CRYPTO_LZO || CRYPTO_ZSTD || CRYPTO_LZ4
-	select CRYPTO_LZO
-	default n
+depends on CRYPTO_ZSTD || CRYPTO_LZ4
 	help
 	  Creates virtual block devices called /dev/zramX (X = 0, 1, ...).
 	  Pages written to these disks are compressed and stored in memory
